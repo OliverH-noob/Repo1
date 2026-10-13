@@ -51,7 +51,7 @@ void loop() {
   /* is a block comment */
 
   // remove the block comment below to see the rover move in all directions
-  /*
+  
   v = -0.346;
   w = 0;
   motor_controller(v,w);
@@ -66,7 +66,7 @@ void loop() {
   w = -4.73;
   motor_controller(v,w);
   delay(1000);
-  */
+  
   // play around with the velocities and the delay() function and see what you can get your robot to do
 }
 
@@ -79,11 +79,87 @@ void motor_controller(float v, float w) {
   // maps required wheel speeds to PWM duty cycle
   // expects -0.346 < v < 0.346 m/s, -4.73 < w < 4.73 rad/s
   // motors will saturate if desired velocity vector is too large, best to keep desired velocities low
+float dphi_L = (v/r) - (L * w)/(2 * r); 
+float dphi_R = (v/r) + (L * w)/(2 * r); 
+// use the constrain function to keep dphi_L and dphi_R within certain boundaries 
 
+  // this prevents unintended behavior of the map function 
+
+  dphi_L = constrain(dphi_L, -11.52, 11.52); 
+
+  dphi_R = constrain(dphi_R, -11.52, 11.52); 
+
+
+  // need to confirm map() behaves well when given non-int input 
+
+  // map() uses integer math, returns only integers which is not a problem in this case 
+
+  // would be a problem if it misbehaves with float input 
+
+  int duty_L = map(dphi_L, -11.52, 11.52, -255, 255); 
+
+  int duty_R = map(dphi_R, -11.52, 11.52, -255, 255); 
+
+
+  drive(duty_L, duty_R); 
 }
 
 void drive(int duty_L, int duty_R) {
   // based on PWM duty cycle setting, assigns motor driver pin values
   // expects duty_L and duty_R to be between -255 and 255
+// left motor 
 
+  if (duty_L > 0) {  // left motor forward 
+
+    digitalWrite(L1, HIGH); 
+
+    digitalWrite(L2, LOW); 
+
+  } 
+
+  if (duty_L < 0) {  // left motor backward 
+
+    digitalWrite(L1, LOW); 
+
+    digitalWrite(L2, HIGH); 
+
+  } 
+
+  if (duty_L == 0) {  // left motor stop 
+
+    digitalWrite(L1, LOW); 
+
+    digitalWrite(L2, LOW); 
+
+  } 
+
+  // right motor 
+
+  if (duty_R > 0) {  // right motor forward 
+
+    digitalWrite(R1, HIGH); 
+
+    digitalWrite(R2, LOW); 
+
+  } 
+
+  if (duty_R < 0) {  // right motor backward 
+
+    digitalWrite(R1, LOW); 
+
+    digitalWrite(R2, HIGH); 
+
+  } 
+
+  if (duty_R == 0) {  // right motor stop 
+
+    digitalWrite(R1, LOW); 
+
+    digitalWrite(R2, LOW); 
+
+  } 
+
+  analogWrite(pwmL, abs(duty_L)); 
+
+  analogWrite(pwmR, abs(duty_R)); 
 }
